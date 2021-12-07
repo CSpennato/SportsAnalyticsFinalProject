@@ -7,6 +7,8 @@ The 'Final Notebook' jupyter notebook was used for the final processing of the d
 
 My code can be found in the getCHADS.py, Game.py, Event.py, and graph.py files.
 
+/events folder contains the event data for all games
+
 /Logos folder just contains images that are used when creating the graphs.
 
 To run the getCHADS.py code the json files must be inserted into the /data folder. That data can be found here:
