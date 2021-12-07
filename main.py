@@ -19,16 +19,4 @@ args = parser.parse_args()
 game = Game(path_to_json=args.path, event_index=args.event)
 total_shots = game.read_json()
 
-print(total_shots)
-
-
-#chads = game.get_CHADS()
-
-#print(len(chads[0]))
-#if len(chads[0]) > 0:
-#    print(np.mean(chads[0]))
-#print(len(chads[1]))
-#if len(chads[1]) > 0:
-#    print(np.mean(chads[1]))
-
 game.start(args.out)

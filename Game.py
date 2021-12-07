@@ -30,7 +30,9 @@ class Game:
         self.home_team = Team(event['home']['teamid'])
         self.guest_team = Team(event['visitor']['teamid'])
         
-          
+        ######## Also by Chris Spennato #########  
+        
+        #this code uses the event id to combine event data with the json data and extract all the shots
         
         event_data = pd.read_csv('events\\'  + self.game_number + '.csv')
         events = data_frame['events']
@@ -50,36 +52,58 @@ class Game:
         for index, row in shots_away.iterrows():
             if row['EVENTNUM'] in event_ids:
                 self.shots_away.append(events[event_ids[row['EVENTNUM']]])
+                
+        ##########################################
         
         return(len(shots_home), len(shots_away))
 
 
-
+##################### Code by Chris Spennato ###########################
+    #function to calculate avg CHAD for every shot in game
     def get_CHADS(self):
+        
+        #first processes home shots
         home_chads = []
         for shot in self.shots_home:
             tmp = Event(shot)
             #ignore events which don't contain any moments
             if tmp.moments:
+            
+                #get shot time to pass to event function
                 shot_time = self.shot_events[self.shot_events['EVENTNUM'] == int(shot['eventId'])]['PCTIMESTRING'].values[0]
+                
+                #use event function with shot time
                 t = tmp.get_CHAD(self.home_team.id, shot_time)[0]
+                
+                #if less than 3 seconds worth of data, ignore it
                 if len(t) >= 75:
+                    #take the mean of the list returned by tmp.get_CHAD, since it returns a list
                     home_chads.append(np.mean(t))
     
+    
+        #then away shots
         away_chads = []
         for shot in self.shots_away:
             tmp = Event(shot)
             #ignore events which don't contain any moments
             if tmp.moments:
+            
+                #get shot time to pass to event function
                 shot_time = self.shot_events[self.shot_events['EVENTNUM'] == int(shot['eventId'])]['PCTIMESTRING'].values[0]
+                
+                #use event function with shot time
                 t = tmp.get_CHAD(self.guest_team.id, shot_time)[0]
+                
+                #if less than 3 seconds worth of data, ignore it
                 if len(t) >= 75:
+                    #take the mean of the list returned by tmp.get_CHAD, since it returns a list
                     away_chads.append(np.mean(t))
         
+        #returns the avg CHAD for game for each team
         return home_chads, away_chads
         
         
-        
+############################################################################        
         
         
     def start(self, output):

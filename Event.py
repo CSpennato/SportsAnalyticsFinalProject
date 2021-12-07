@@ -55,6 +55,7 @@ class Event:
         ball_circle.center = moment.ball.x, moment.ball.y
         ball_circle.radius = moment.ball.radius / Constant.NORMALIZATION_COEF
         
+        #updated the plotting to include convex hull area
         if(len(defense_pts) != 0):
             hull = ConvexHull(defense_pts)
             chad.xy = [defense_pts[i] for i in hull.vertices]
@@ -70,15 +71,30 @@ class Event:
         return player_circles, ball_circle, chad
         
         
+        
+
+##################### Code by Chris Spennato ###########################
+
+#function to calculate the average CHAD for this play
+#takes offense_id to know which team is on offense_id
+#takes shot_time to stop calculating CHAD after shot taken
+
+#returns a list of CHAD, one for each frame, for each team
     def get_CHAD(self, offense_id, shot_time):
         pt = datetime.strptime(shot_time,'%M:%S')
         shot_seconds = pt.second + pt.minute*60
         
+        #iterate through all frames of the play
         for i, moment in enumerate(self.moments):
+            #if data is missing player data skip
             if len(moment.players) == 0:
                 continue
+                
+            #if time has passed shot_time, stop
             if moment.game_clock <= shot_seconds:
                 break
+                
+            #gather points for each team at this frame
             offense_pts = []
             defense_pts = []
             for j, circle in enumerate(self.moments[0].players):
@@ -89,11 +105,16 @@ class Event:
                 else:
                     defense_pts.append([moment.players[j].x, moment.players[j].y])      
             
+            #if there are less than three players, ignore this frame
             if len(offense_pts) > 2 and len(defense_pts) > 2:
+                #append the convex hull area to each list
                 self.CHAD.append(ConvexHull(defense_pts).volume)
                 self.CHAO.append(ConvexHull(offense_pts).volume)
                 
         return self.CHAD, self.CHAO
+
+
+############################################################################        
 
 
     def show(self, output):
@@ -166,6 +187,7 @@ class Event:
         #plt.show()
         
         
+        #modified to save the output rather than showing it
         f = os.path.join(os.getcwd(), output + '.gif')
         writergif = animation.PillowWriter(fps=30) 
         anim.save(f, writer=writergif)

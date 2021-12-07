@@ -1,3 +1,11 @@
+################ WARNING - This can take a very long time to run depending on the number of games ##############
+
+
+#Script to calculate average CHADs for many games at a time
+#takes in path to a directory containing the json files
+#requires json data to be in directory called data and event data to be in csv format in directory called events
+#both files should simply be called <game_id>.json or <game_id>.csv
+
 import sys,os, getopt
 
 from Game import Game
@@ -11,6 +19,7 @@ def main(argv):
     directory = ''
     outputfile = ''
     
+    #takes in the output file location/name as an argument
     try:
         opts, args = getopt.getopt(argv,"hd:o:")
     except getopt.GetoptError:
@@ -27,12 +36,14 @@ def main(argv):
             directory = arg
     
     
+    #iterates through each file in the json directory provided
     files = os.listdir(directory)
     print('Total number of games: ' + str(len(files)))
     count = 0
     columns=['Game ID', 'Home Team', 'Home Shots', 'Home Shots Used', 'Home CHAD', 'Away Team', 'Away Shots', 'Away Shots Used', 'Away CHAD']
     df = pd.DataFrame(columns=columns)
     
+    #for each file get the chad, shots, etc and append to the dataframe
     errors = []
     for file in files:
         try:
@@ -46,7 +57,8 @@ def main(argv):
             
             print('Completed processing game ' + file[:10])
             count += 1 
-            
+         
+        #catch any errors so script doesn't crash 
         except OSError:
             print('Error accessing file: ' + file)
         except Exception as e:
@@ -58,15 +70,17 @@ def main(argv):
     
     print('Successfully processed ' + str(count) + ' of ' + str(len(files)) + ' games')
     
-   
+   #write the output to the given outputfile
     try:
         df.to_csv(outputfile, index = False)
+    #backup in case outputfile has issue
     except OSError:
         df.to_csv('backup.csv', index = False)
         print('Error writing to output file')
         print('Data written to backup.csv')
         sys.exit()
 	
+    #write errors to a file as well
     try:
         with open('errors.txt', 'w') as f:
             f.write(errors)
